@@ -1,0 +1,117 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="customer" format="json">
+      <types:shape format="weave" example="examples/customer.json"><![CDATA[%dw 2.0
+
+type customer = {|
+  name: String, 
+  "Mobile Number": String, 
+  Address: String, 
+  Amount: String
+|} {"example": "{\"name\":\"Ishu\",\"Mobile Number\":\"70113624864\",\"Address\":\"B - 228, Sector - 391, Noida\",\"Amount\":\"383\"}"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="account" format="json">
+      <types:shape format="weave" example="examples/Account-1.json"><![CDATA[%dw 2.0
+
+type account = {|
+  name: String, 
+  "Mobile Number": String, 
+  "Billing Street": String, 
+  "Billing City": String, 
+  "Billing State": String, 
+  "Billing Postal Code": String, 
+  "Billing Country": String, 
+  "Shipping Street": String, 
+  "Shipping City": String, 
+  "Shipping State": String, 
+  "Shipping Postal Code": String, 
+  "Shipping Country": String, 
+  Amount: String
+|} {"example": "{\"name\":\"Ishu\",\"Mobile Number\":\"2378326326\",\"Billing Street\":\"B- 232\",\"Billing City\":\"Noida\",\"Billing State\":\"Uttar Pradesh\",\"Billing Postal Code\":\"201301\",\"Billing Country\":\"India\",\"Shipping Street\":\"B- 232\",\"Shipping City\":\"Noida\",\"Shipping State\":\"Uttar Pradesh\",\"Shipping Postal Code\":\"201301\",\"Shipping Country\":\"India\",\"Amount\":\"123\"}"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="updateAccount" format="json">
+      <types:shape format="weave" example="examples/Account-2.json"><![CDATA[%dw 2.0
+
+type updateAccount = {|
+  name: String, 
+  "Mobile Number": String, 
+  "Billing Street": String, 
+  "Billing City": String, 
+  "Billing State": String, 
+  "Billing Postal Code": String, 
+  "Billing Country": String, 
+  "Shipping Street": String, 
+  "Shipping City": String, 
+  "Shipping State": String, 
+  "Shipping Postal Code": String, 
+  "Shipping Country": String, 
+  Amount: String
+|} {"example": "{\"name\":\"Ishu\",\"Mobile Number\":\"2378326326\",\"Billing Street\":\"B- 87565\",\"Billing City\":\"Noida\",\"Billing State\":\"Uttar Pradesh\",\"Billing Postal Code\":\"201301\",\"Billing Country\":\"India\",\"Shipping Street\":\"B- 232\",\"Shipping City\":\"Noida\",\"Shipping State\":\"Uttar Pradesh\",\"Shipping Postal Code\":\"201301\",\"Shipping Country\":\"India\",\"Amount\":\"123\"}"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="updateInfo" format="json">
+      <types:shape format="weave" example="examples/update.json"><![CDATA[%dw 2.0
+
+type updateInfo = {|
+  CustomerID: Number {"typeId": "int"}, 
+  name: String, 
+  "Mobile Number": String, 
+  "Billing Street": String, 
+  "Billing City": String, 
+  "Billing State": String, 
+  "Billing Postal Code": String, 
+  "Billing Country": String, 
+  "Shipping Street": String, 
+  "Shipping City": String, 
+  "Shipping State": String, 
+  "Shipping Postal Code": String, 
+  "Shipping Country": String, 
+  Amount: String
+|} {"example": "{\"CustomerID\":0,\"name\":\"Ishu\",\"Mobile Number\":\"2378326326\",\"Billing Street\":\"B- 87565\",\"Billing City\":\"Noida\",\"Billing State\":\"Uttar Pradesh\",\"Billing Postal Code\":\"201301\",\"Billing Country\":\"India\",\"Shipping Street\":\"B- 232\",\"Shipping City\":\"Noida\",\"Shipping State\":\"Uttar Pradesh\",\"Shipping Postal Code\":\"201301\",\"Shipping Country\":\"India\",\"Amount\":\"123\"}"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#ba963308-07e4-4061-87e8-16768cb59114">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="customer"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#06f72615-de59-4a4e-9b41-864c25fd3b0d">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="account"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#378aa038-5390-45fb-9b0c-970b33d2bd1d">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="updateAccount"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#ecec0c67-cca7-4515-a3f1-9945462e4049">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="updateInfo"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

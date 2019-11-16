@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="d8431448-81e8-4e84-a871-a9ceea91c908" >
+		<salesforce:basic-connection username="ishu@apisero.com" password="agrawal9^" securityToken="R3iyw273SRRnDmA4q0eVBHulv" />
+	</salesforce:sfdc-config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="6cfb62e9-b7a3-45e4-ab24-aa106684e866" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="2995a929-a92d-443f-8874-8913e274c65d" >
+		<db:my-sql-connection host="www.db4free.net" port="3306" user="muleraja_v1" password="Ishuagrawal" database="ecommerce_new" />
+	</db:config>
+	<validation:config name="Validation_Config" doc:name="Validation Config" doc:id="3cf2899f-0e21-436b-91f5-1cf259933f2d" i18n="#[payload]" />
+	<flow name="retreiveData" doc:id="7d3d11cf-78e6-4531-99de-2b8c341df002" >
+		<http:listener doc:name="Listener" doc:id="383d48e0-0400-49ba-bf27-ef8c786d9411" config-ref="HTTP_Listener_config" path="/getCustomerData"/>
+		<salesforce:query doc:name="Query" doc:id="c8d3d093-db23-46f2-b119-2ef6aeaf87d4" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query >SELECT Name, BillingAddress, Phone, ShippingAddress, CustomerID__c
+FROM Account</salesforce:salesforce-query>
+		</salesforce:query>
+		<ee:transform doc:name="Transform Message" doc:id="790e93fc-cabc-495b-abfb-864fa0f808e7" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="acceptData" doc:id="b52dbc5a-e86d-48cf-9737-b0fc5e5d5be2" >
+		<http:listener doc:name="Listener" doc:id="e20cb21e-aeb5-4431-9d1e-3f61eb879b7a" config-ref="HTTP_Listener_config" path="/addCustomerData"/>
+		<validation:is-not-null doc:name="Is not null" doc:id="9aec743f-39a1-4d62-b69d-e5344d6c7059" config-ref="Validation_Config" value="#[payload]"/>
+		<ee:transform doc:name="Transform Message" doc:id="06f72615-de59-4a4e-9b41-864c25fd3b0d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+[{
+	Name: payload.name,
+	BillingStreet: payload."Billing Street",
+	BillingCity: payload."Billing City",
+	BillingState: payload."Billing State",
+	BillingPostalCode: payload."Billing Postal Code",
+	BillingCountry: payload."Billing Country",
+	ShippingStreet: payload."Shipping Street",
+	ShippingCity: payload."Shipping City",
+	ShippingState: payload."Shipping State",
+	ShippingPostalCode: payload."Shipping Postal Code",
+	ShippingCountry: payload."Shipping Country",
+	Phone: payload."Mobile Number"
+}]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:create type="Account" doc:name="createInfo" doc:id="9de943ea-bb46-45ae-847b-c32bb1146139" config-ref="Salesforce_Config"/>
+	</flow>
+	<flow name="UpdateData" doc:id="c7c12ee7-f4d3-490c-b685-9eca1bdbef76" >
+		<http:listener doc:name="Listener" doc:id="feec391e-7570-40ec-86c8-b8d0fc782e36" config-ref="HTTP_Listener_config" path="/updateDCustomerData"/>
+		<ee:transform doc:name="Transform Message" doc:id="ecec0c67-cca7-4515-a3f1-9945462e4049" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+[{
+	Name: payload.name,
+	BillingStreet: payload."Billing Street",
+	BillingCity: payload."Billing City",
+	BillingState: payload."Billing State",
+	BillingPostalCode: payload."Billing Postal Code",
+	BillingCountry: payload."Billing Country",
+	ShippingStreet: payload."Shipping Street",
+	ShippingCity: payload."Shipping City",
+	ShippingState: payload."Shipping State",
+	ShippingPostalCode: payload."Shipping Postal Code",
+	ShippingCountry: payload."Shipping Country",
+	Phone: payload."Mobile Number",
+	CustomerID__c: payload.CustomerID as String
+}]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:upsert doc:name="Upsert" doc:id="f7f6829e-7efe-45b6-a6c8-f335e040de96" config-ref="Salesforce_Config" externalIdFieldName="CustomerID__c" type="Account"/>
+	</flow>
+	<flow name="scheduler" doc:id="3b113779-a010-46c6-907a-48b8f678bf7c" >
+		<scheduler doc:name="Scheduler" doc:id="8ce77d2c-ddcd-483f-850e-5198fa6ee2a5" >
+			<scheduling-strategy >
+				<cron expression="0  0 24 ? * *" />
+			</scheduling-strategy>
+		</scheduler>
+		<flow-ref doc:name="toDataBase" doc:id="10fa890c-cc79-46e8-8a0c-9288645e7ca7" name="AddIntoDatabase"/>
+	</flow>
+	<flow name="AddIntoDatabase" doc:id="2b4edd97-d251-4bf6-a445-923be68d19a3" >
+		<db:delete doc:name="Truncate" doc:id="8510b7a9-4591-4c42-a031-4bee3172dc4b" config-ref="Database_Config">
+			<db:sql >TRUNCATE TABLE Customer;</db:sql>
+		</db:delete>
+		<flow-ref doc:name="Extract Data From SalesForce" doc:id="172d4ae7-d179-4d15-afd8-98b2a958a2ff" name="retreiveData"/>
+		<db:insert doc:id="2e6452e3-ba97-4896-b1bb-48c54b3d910e" config-ref="Database_Config">
+			<db:sql >INSERT INTO Customer VALUES(
+:ID, :NAME, :MNUMBER, :BSTREET, :BCITY, :BSTATE, BPOSTCODE, :BCOUNTRY, :SSTREET, :SCITY, :SSTATE, SPOSTCODE, :SCOUNTRY);</db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	"ID" : payload.CustomerID__c,
+	"NAME" : payload.Name,
+	"MNUMBER" : payload.Phone,
+	"BSTREET" : payload.BillingStreet,
+	"BCITY" : payload.Billing.City,
+	"BSTATE" : payload.BilligState,
+	"BPOSTCODE" : payload.BillingPostalCode,
+	"BCountry" : payload.BillingCountry,
+	"SSTREET" : payload.ShippingStreet,
+	"SCITY" : payload.ShippingCity,
+	"SSTATE" : payload.ShippingState,
+	"SPOSTCODE" : payload.ShippingPostalCode,
+	"SCOUNTRY" : payload.ShippingCountry
+}]]]></db:input-parameters>
+		</db:insert>
+	</flow>
+</mule>
